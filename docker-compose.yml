@@ -1,0 +1,82 @@
+services:
+
+#  database:
+#   image: postgres:14.6-alpine
+#   container_name: postgres-db
+#   restart: always
+#   volumes:
+#     - /opt/pgdata:/var/lib/postgresql/data/
+#   env_file:
+#      - ./env.dev
+
+  django_app:
+    container_name: app
+    restart: always
+    build: .
+    ports:
+      - 8000:8000
+#    volumes:
+#      - /opt/media:/home/app/media # Need to have write permissions for user app on host server
+#    env_file:
+#      - ./env.dev
+    command: bash -c "
+        python manage.py migrate && 
+        gunicorn digital_twin.wsgi:application --bind 0.0.0.0:8000 --workers=1
+      "
+#    depends_on:
+#      - database
+
+# https://github.com/nginx-proxy/nginx-proxy
+#  nginx-proxy:
+#    container_name: nginx-proxy
+#    restart: always
+#    build: nginx
+#    ports:
+#      - 443:443
+#      - 80:80
+#    volumes:
+#      - certs:/etc/nginx/certs
+#      - html:/usr/share/nginx/html
+#      - vhost:/etc/nginx/vhost.d
+#      - /var/run/docker.sock:/tmp/docker.sock:ro
+#    depends_on:
+#      - digital_twin
+#
+#  acme-companion:
+#    container_name: acme
+#    restart: always
+#    image: nginxproxy/acme-companion
+#    environment:
+#      DEFAULT_EMAIL: "dal@nextfusion.org"
+##      ACME_CA_URI: "https://acme-staging-v02.api.letsencrypt.org/directory"
+#      ACME_CA_URI: "https://acme-v02.api.letsencrypt.org/directory"
+#      NGINX_PROXY_CONTAINER: "nginx-proxy"
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#      - certs:/etc/nginx/certs
+#      - html:/usr/share/nginx/html
+#      - vhost:/etc/nginx/vhost.d
+#      - acme:/etc/acme.sh
+#    depends_on:
+#      - nginx-proxy
+#
+#  dozzle:
+#    container_name: dozzle
+#    restart: always
+#    image: amir20/dozzle:latest
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    ports:
+#      - 8080:8080
+#    environment:
+#      VIRTUAL_HOST: fusiontwin.io
+#      VIRTUAL_PATH: /logs
+#      DOZZLE_BASE: /logs
+#      VIRTUAL_PORT: 8080
+#
+volumes:
+  vol:
+#  certs:
+#  html:
+#  vhost:
+#  acme:
