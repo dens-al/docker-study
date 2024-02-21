@@ -1,37 +1,54 @@
 name: Tag Docker Image with Git
-
+#
+#on:
+#  push:
+##    tags:
+##    - /^v\d+\.\d+\.\d+$/
+#    branches:
+#      - 'dev'
 on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 1"
   push:
-#    tags:
-#    - /^v\d+\.\d+\.\d+$/
     branches:
-      - 'dev'
-jobs:
+      - dev
+  pull_request:
+    branches:
+      - main
+    tags:
+      - "*.*.*"
+    paths-ignore:
+      - ".gitignore"
+      - "docker-compose.yml"
+      - "*.md"
 
-#  build:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v3
-#
-#    - name: Log into registry ${{ env.REGISTRY }}
-#      uses: docker/login-action@v1
-#      with:
-#        registry: ${{ env.REGISTRY }}
-#        username: ${{ github.actor }}
-#        password: ${{ secrets.GITHUB_TOKEN }
-#
-#    - name: Build the Docker image
-#      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
-#
-#    - name: Login to Docker Hub
-#      uses: docker/login-action@v3
-#      with:
-#        username: ${{ secrets.DOCKERHUB_USERNAME }}
-#        password: ${{ secrets.DOCKERHUB_TOKEN }}
-### ========
+jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: Get Docker metadata
+        id: docker_meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+#            ghcr.io/fusiontwin/dt-be
+            fusiontwin/dt-be
+          tags: |
+            type=semver,pattern={{version}},enable=${{ matrix.base == 'debian' }}
+            type=edge,enable=true,priority=700,prefix=,suffix=,branch=dev
+#            type=sha,prefix={{branch}}-
+#            type=sha,enable=true,priority=100,prefix=sha-,suffix=
+#            type=semver,pattern={{major}}.{{minor}},enable=${{ matrix.base == 'debian' }}
+#            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+          labels: |
+            org.opencontainers.image.title=dtwin-backend
+            org.opencontainers.image.description=Digital Twin Backend
+            org.opencontainers.image.vendor=Next Step Fusion
+          flavor: |
+            latest=false
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
