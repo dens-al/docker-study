@@ -1,27 +1,24 @@
-name: Tag Docker Image with Git
-#
-#on:
-#  push:
-##    tags:
-##    - /^v\d+\.\d+\.\d+$/
-#    branches:
-#      - 'dev'
+name: Build Docker Image and Push to DockerHub
+
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * 1"
   push:
     branches:
       - dev
-  pull_request:
-    branches:
-      - main
     tags:
       - "*.*.*"
     paths-ignore:
       - ".gitignore"
       - "docker-compose.yml"
       - "*.md"
+#  pull_request:
+#    branches:
+#      - main
+#    tags:
+#      - "*.*.*"
+#    paths-ignore:
+#      - ".gitignore"
+#      - "docker-compose.yml"
+#      - "*.md"
 
 jobs:
   docker:
@@ -61,5 +58,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          push: true
-          tags: fusiontwin/dt-be:latest
+          push: ${{ github.event_name = 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
