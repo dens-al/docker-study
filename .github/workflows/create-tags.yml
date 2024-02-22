@@ -38,7 +38,7 @@ jobs:
         if: steps.create_tag.outputs.successful
         with:
           push: true #${{ github.event_name == 'push.tags' }}
-          tags: fusiontwin/dt:${{ steps.create_tag.outputs.versionNumber }}
+          tags: fusiontwin/dt-be:${{ steps.create_tag.outputs.versionNumber }}
 
       - name: Generate Changelog
         id: changelog
