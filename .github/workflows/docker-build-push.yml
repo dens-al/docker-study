@@ -41,23 +41,36 @@ jobs:
           #filter: (^[\s]+?[R|r]elease)|(^[R|r]elease)
           filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
 
+#      - name: Create Release
+#        id: create_release
+#        uses: actions/create-release@latest
+#        if: steps.create_tag.outputs.successful
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ steps.create_tag.outputs.version }}
+#          release_name: ${{ steps.create_tag.outputs.version }}
+#          body: |
+#            ```bash
+#            docker pull fusiontwin/dt-be:${{steps.changelog.outputs.version}}
+#            ```
+#            ${{ steps.changelog.outputs.compareurl }}
+#            ${{ steps.changelog.outputs.changelog }}
+#          draft: false
+#          prerelease: false
+
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@latest
+        uses: jaywcjlove/create-tag-action@main
         if: steps.create_tag.outputs.successful
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.create_tag.outputs.version }}
-          release_name: ${{ steps.create_tag.outputs.version }}
+          version: ${{steps.create_tag.outputs.version}}
+          release: true
           body: |
             ```bash
             docker pull fusiontwin/dt-be:${{steps.changelog.outputs.version}}
             ```            
             ${{ steps.changelog.outputs.compareurl }}
             ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: false
 
 #      - name: Create Release
 #        uses: ncipollo/release-action@v1
