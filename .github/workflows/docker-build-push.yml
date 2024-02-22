@@ -49,8 +49,8 @@ jobs:
         id: create_tag
         uses: jaywcjlove/create-tag-action@v1.3.20
 #        if: env.previous_tag
-        with:
-          package-path: ./package.json
+#        with:
+#          package-path: ./package.json
 
 #      - name: Generate Changelog
 #        id: changelog
