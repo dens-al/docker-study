@@ -1,0 +1,45 @@
+name: Create tags based on package.json file
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - ".gitignore"
+      - "docker-compose.yml"
+      - "*.md"
+#      - '.github/**/*.yml'
+
+jobs:
+  update_tags:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Tag
+        id: create_tag
+        uses: jaywcjlove/create-tag-action@v1.3.20
+        with:
+          package-path: ./package.json
+
+      - name: Generate Changelog
+        id: changelog
+        uses: jaywcjlove/changelog-generator@main
+        if: steps.create_tag.outputs.successful
+        with:
+          head-ref: ${{steps.create_tag.outputs.version}}
+          #filter: (^[\s]+?[R|r]elease)|(^[R|r]elease)
+          filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
+
+      - name: Create Release
+        uses: jaywcjlove/create-tag-action@main
+        if: steps.create_tag.outputs.successful
+        with:
+          version: ${{steps.create_tag.outputs.version}}
+          release: true
+          body: |
+            ```bash
+            docker pull fusiontwin/dt-be:${{steps.changelog.outputs.version}}
+            ```            
+            ${{ steps.changelog.outputs.compareurl }}
+            ${{ steps.changelog.outputs.changelog }}
