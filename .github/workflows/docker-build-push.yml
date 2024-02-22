@@ -32,15 +32,6 @@ jobs:
         with:
           package-path: ./package.json
 
-#      - name: Generate Changelog
-#        id: changelog
-#        uses: jaywcjlove/changelog-generator@v1.4.3
-#        if: steps.create_tag.outputs.successful
-#        with:
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          head-ref: ${{ steps.create_tag.outputs.version }}
-#          filter-author: (jaywcjlove|小弟调调™|renovate|renovate-bot|dependabot\[bot\]|Renovate Bot)
-#          filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
 
       - name: Generate Changelog
         id: changelog
@@ -51,23 +42,37 @@ jobs:
           filter-author: (jaywcjlove|小弟调调™|dependabot\[bot\]|Renovate Bot)
           filter: (^[\s]+?[R|r]elease)|(^[R|r]elease)
 
-
       - name: Create Release
-        uses: ncipollo/release-action@v1
+        id: create_release
+        uses: actions/create-release@latest
         if: steps.create_tag.outputs.successful
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          name: ${{ steps.changelog.outputs.tag }}
-          tag: ${{ steps.changelog.outputs.tag }}
+          tag_name: ${{ steps.create_tag.outputs.version }}
+          release_name: ${{ steps.create_tag.outputs.version }}
           body: |
-            [![](https://img.shields.io/badge/Open%20in-unpkg-blue)](https://uiwjs.github.io/npm-unpkg/#/pkg/@uiw/react-native@${{steps.changelog.outputs.version}}/file/README.md) [![npm version](https://img.shields.io/npm/v/@uiw/react-native.svg)](https://www.npmjs.com/package/@uiw/react-native) [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@uiw/react-native)](https://bundlephobia.com/result?p=@uiw/react-native@${{steps.changelog.outputs.version}})
-            
-            ```bash
-            npm i @uiw/react-native@${{steps.changelog.outputs.version}}
-            ```
-
             ${{ steps.changelog.outputs.compareurl }}
             ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+
+#      - name: Create Release
+#        uses: ncipollo/release-action@v1
+#        if: steps.create_tag.outputs.successful
+#        with:
+#          token: ${{ secrets.GITHUB_TOKEN }}
+#          name: ${{ steps.changelog.outputs.tag }}
+#          tag: ${{ steps.changelog.outputs.tag }}
+#          body: |
+#            [![](https://img.shields.io/badge/Open%20in-unpkg-blue)](https://uiwjs.github.io/npm-unpkg/#/pkg/@uiw/react-native@${{steps.changelog.outputs.version}}/file/README.md) [![npm version](https://img.shields.io/npm/v/@uiw/react-native.svg)](https://www.npmjs.com/package/@uiw/react-native) [![npm bundle size](https://img.shields.io/bundlephobia/minzip/@uiw/react-native)](https://bundlephobia.com/result?p=@uiw/react-native@${{steps.changelog.outputs.version}})
+#
+#            ```bash
+#            npm i @uiw/react-native@${{steps.changelog.outputs.version}}
+#            ```
+#
+#            ${{ steps.changelog.outputs.compareurl }}
+#            ${{ steps.changelog.outputs.changelog }}
 
 #      - name: Get Docker metadata
 #        id: docker_meta
