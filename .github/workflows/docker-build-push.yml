@@ -8,7 +8,8 @@ on:
       - ".gitignore"
       - "docker-compose.yml"
       - "*.md"
-      - '.github/**/*.yml'
+#      - '.github/**/*.yml'
+
 #  pull_request:
 #    branches:
 #      - main
