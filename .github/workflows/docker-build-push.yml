@@ -58,7 +58,16 @@ jobs:
           draft: false
           prerelease: false
 
-#
+      - name: release-please
+        id: release
+        uses: google-github-actions/release-please-action@v3
+        with:
+          release-type: simple
+          package-name: release
+          bump-minor-pre-major: true
+          bump-patch-for-minor-pre-major: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
 #      - name: Create Release
 #        uses: ncipollo/release-action@v1
 #        if: steps.create_tag.outputs.successful
