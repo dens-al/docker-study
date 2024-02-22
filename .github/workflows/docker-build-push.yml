@@ -50,7 +50,7 @@ jobs:
       - name: Create Tag
         id: create_tag
         uses: jaywcjlove/create-tag-action@v1.3.20
-        if: env.previous_tag
+#        if: env.previous_tag
         with:
           package-path: ./project.json
 
