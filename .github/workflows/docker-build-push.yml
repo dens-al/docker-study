@@ -30,7 +30,7 @@ jobs:
         id: create_tag
         uses: jaywcjlove/create-tag-action@v1.3.20
         with:
-          package-path: ./project.json
+          package-path: ./package.json
 
 #      - name: Generate Changelog
 #        id: changelog
