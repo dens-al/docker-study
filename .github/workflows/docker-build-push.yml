@@ -55,6 +55,7 @@ jobs:
             ${{ steps.changelog.outputs.changelog }}
 
   docker:
+    needs: tags
     runs-on: ubuntu-latest
     steps:
 
