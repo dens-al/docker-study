@@ -3,9 +3,7 @@ name: Build Docker Image and Push to DockerHub
 on:
   push:
     branches:
-      - dev
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+      - main
     paths-ignore:
       - ".gitignore"
       - "docker-compose.yml"
