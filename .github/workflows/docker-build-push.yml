@@ -54,7 +54,7 @@ jobs:
             ${{ steps.changelog.outputs.compareurl }}
             ${{ steps.changelog.outputs.changelog }}
 
-  tags:
+  docker:
     runs-on: ubuntu-latest
     steps:
 
