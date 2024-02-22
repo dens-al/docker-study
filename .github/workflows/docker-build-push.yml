@@ -38,7 +38,8 @@ jobs:
         if: steps.create_tag.outputs.successful
         with:
           head-ref: ${{steps.create_tag.outputs.version}}
-          filter: (^[\s]+?[R|r]elease)|(^[R|r]elease)
+          #filter: (^[\s]+?[R|r]elease)|(^[R|r]elease)
+          filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
 
       - name: Create Release
         id: create_release
@@ -57,16 +58,6 @@ jobs:
             ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: false
-
-      - name: release-please
-        id: release
-        uses: google-github-actions/release-please-action@v3
-        with:
-          release-type: simple
-          package-name: release
-          bump-minor-pre-major: true
-          bump-patch-for-minor-pre-major: true
-          token: ${{ secrets.GITHUB_TOKEN }}
 
 #      - name: Create Release
 #        uses: ncipollo/release-action@v1
