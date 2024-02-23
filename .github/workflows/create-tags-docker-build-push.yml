@@ -1,14 +1,11 @@
-name: Create tags based on package.json file, build and push docker image
+name: Create tags, Build and Push Docker image
 
 on:
   push:
     branches:
       - main
-    paths-ignore:
-      - ".gitignore"
-      - "docker-compose.yml"
-      - "*.md"
-#      - '.github/**/*.yml'
+    paths:
+      - 'package.json'
 
 jobs:
   update_tags:

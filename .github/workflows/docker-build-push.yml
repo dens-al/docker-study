@@ -4,7 +4,11 @@ on:
   push:
     tags:
       - "*.*.*"
-
+    paths-ignore:
+      - ".gitignore"
+      - "docker-compose.yml"
+      - "*.md"
+      - '.github/**/*.yml'
 jobs:
   docker:
     needs: tags
