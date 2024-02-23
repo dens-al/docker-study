@@ -8,7 +8,7 @@ on:
       - 'package.json'
 
 jobs:
-  update_tags:
+  CI:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
