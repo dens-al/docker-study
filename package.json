@@ -1,5 +1,6 @@
 {
   "name": "dtwin",
   "version": "0.0.12",
-  "description": "This is description for backend"
+  "description": "This is description for backend",
+  "foo": "bar"
 }
