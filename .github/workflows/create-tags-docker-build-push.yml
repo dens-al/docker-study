@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - 'package.json'
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.actor }}/docker-image:latest
 
 jobs:
   build:
