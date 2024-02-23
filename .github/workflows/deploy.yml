@@ -30,8 +30,8 @@ jobs:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_KEY }}
-        source: "./"
-        target: "target"
+        source: ${{ steps.changed-files.outputs.all_changed_files }}
+        target: "./"
 
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@v1.0.3
