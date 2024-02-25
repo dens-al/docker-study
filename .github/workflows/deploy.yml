@@ -17,7 +17,6 @@ on:
         type: environment
         required: true
 
-
 jobs:
   deployment:
     runs-on: ubuntu-latest
