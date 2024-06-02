@@ -1,4 +1,4 @@
-name: Test tags
+name: Test workflow
 on:
   workflow_dispatch:
     inputs:
