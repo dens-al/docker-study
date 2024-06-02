@@ -48,6 +48,3 @@ USER app
 EXPOSE 8000
 
 #CMD ["gunicorn", "digital_twin.wsgi:application", "--bind", "0.0.0.0:8000", "--workers=1"]
-
-#docker build --network=host -t digital_twin .
-#docker run --net=host -p 8000:8000 -v /home/whoami/NSF/digital_twin_backend/digital_twin/media:/digital_twin_backend/digital_twin/media  digital_twin

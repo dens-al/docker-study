@@ -1,82 +1,96 @@
 services:
 
 #  database:
-#   image: postgres:14.6-alpine
-#   container_name: postgres-db
-#   restart: always
-#   volumes:
-#     - /opt/pgdata:/var/lib/postgresql/data/
-#   env_file:
-#      - ./env.dev
-
-  django_app:
-    container_name: app
-    restart: always
-    build: .
-    ports:
-      - 8000:8000
+#    image: postgres:14.6-alpine
+#    container_name: postgres-db
+#    restart: always
 #    volumes:
-#      - /opt/media:/home/app/media # Need to have write permissions for user app on host server
+#      - /opt/pgdata:/var/lib/postgresql/data/
 #    env_file:
 #      - ./env.dev
-    command: bash -c "
-        python manage.py migrate && 
-        gunicorn digital_twin.wsgi:application --bind 0.0.0.0:8000 --workers=1
-      "
+
+#  pgadmin:
+#    image: dpage/pgadmin4
+#    container_name: pgadmin4
+#    restart: always
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: ik@nextfusion.org
+#      PGADMIN_DEFAULT_PASSWORD: p@55w0rd
+#      VIRTUAL_HOST: tapi.fusiontwin.io
+#      VIRTUAL_PATH: /pgadmin
+#      VIRTUAL_PORT: 80
+#      SCRIPT_NAME: /pgadmin
+#    volumes:
+#      - /opt/pgadmin:/var/lib/pgadmin # to store sessions (Need permissions for uid 5050 (pgadmin user) or just 777)
 #    depends_on:
 #      - database
 
-# https://github.com/nginx-proxy/nginx-proxy
-#  nginx-proxy:
-#    container_name: nginx-proxy
+#  app:
+#    container_name: dt-be
 #    restart: always
-#    build: nginx
-#    ports:
-#      - 443:443
-#      - 80:80
+#    build: . # TODO better to build separately and here pull existing image
 #    volumes:
-#      - certs:/etc/nginx/certs
-#      - html:/usr/share/nginx/html
-#      - vhost:/etc/nginx/vhost.d
-#      - /var/run/docker.sock:/tmp/docker.sock:ro
+#      - /opt/media:/home/app/media   # Need write permissions for user app on host server
+#      - /opt/static:/home/app/static
+#    env_file:
+#      - ./env.dev
+#    command: bash -c "
+#      python manage.py migrate &&
+#      python manage.py collectstatic -v 2 --noinput &&
+#      gunicorn digital_twin.wsgi:application --bind 0.0.0.0:8000 --workers=4 --preload
+#      "
 #    depends_on:
-#      - digital_twin
-#
-#  acme-companion:
-#    container_name: acme
-#    restart: always
-#    image: nginxproxy/acme-companion
-#    environment:
-#      DEFAULT_EMAIL: "dal@nextfusion.org"
-##      ACME_CA_URI: "https://acme-staging-v02.api.letsencrypt.org/directory"
-#      ACME_CA_URI: "https://acme-v02.api.letsencrypt.org/directory"
-#      NGINX_PROXY_CONTAINER: "nginx-proxy"
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock:ro
-#      - certs:/etc/nginx/certs
-#      - html:/usr/share/nginx/html
-#      - vhost:/etc/nginx/vhost.d
-#      - acme:/etc/acme.sh
-#    depends_on:
-#      - nginx-proxy
-#
-#  dozzle:
-#    container_name: dozzle
-#    restart: always
-#    image: amir20/dozzle:latest
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock
-#    ports:
-#      - 8080:8080
-#    environment:
-#      VIRTUAL_HOST: fusiontwin.io
-#      VIRTUAL_PATH: /logs
-#      DOZZLE_BASE: /logs
-#      VIRTUAL_PORT: 8080
-#
+#      - database
+
+  # https://github.com/nginx-proxy/nginx-proxy
+  nginx-proxy:
+    container_name: nginx-proxy
+    restart: always
+    build: nginx-proxy  # my folder with custom Dockerfile for nginx-proxy
+    ports:
+      - 80:80           # must be for acme challenge to approve LetsEncrypt domain
+      - 443:443
+    volumes:
+      - /opt/nginx/certs:/etc/nginx/certs # must contain valid SSL certs and key with domain name e.g. den-ops.ru.crt and den-ops.ru.key
+      - /opt/static:/mount/app/static     # added for django static files. Defined in vhost.d/default
+      - html:/usr/share/nginx/html        # must be for acme challenge to approve LetsEncrypt domain
+      - vhost:/etc/nginx/vhost.d
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    environment:
+      LOG_JSON=: true
+      LOG_FORMAT: '{"msec":"$msec","connection":"$connection","connection_requests":"$connection_requests","pid": "$pid","request_id": "$request_id","request_length": "$request_length","remote_addr": "$remote_addr","remote_user": "$remote_user","remote_port": "$remote_port","time_local": "$time_local","time_iso8601": "$time_iso8601","request": "$request","request_uri": "$request_uri","args": "$args","status": "$status","body_bytes_sent": "$body_bytes_sent","bytes_sent": "$bytes_sent","http_referer": "$http_referer","http_user_agent": "$http_user_agent","http_x_forwarded_for": "$http_x_forwarded_for","http_host": "$http_host","server_name": "$server_name","request_time": "$request_time","upstream": "$upstream_addr","upstream_connect_time": "$upstream_connect_time","upstream_header_time": "$upstream_header_time","upstream_response_time": "$upstream_response_time","upstream_response_length": "$upstream_response_length","upstream_cache_status": "$upstream_cache_status","ssl_protocol": "$ssl_protocol","ssl_cipher": "$ssl_cipher","scheme": "$scheme","request_method": "$request_method","server_protocol": "$server_protocol","pipe": "$pipe","gzip_ratio": "$gzip_ratio" }'
+
+  acme-companion:
+    container_name: acme
+    restart: always
+    image: nginxproxy/acme-companion
+    environment:
+      DEFAULT_EMAIL: "denis@almuhametov.com"
+      #ACME_CA_URI: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      ACME_CA_URI: "https://acme-v02.api.letsencrypt.org/directory"
+      NGINX_PROXY_CONTAINER: "nginx-proxy"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/nginx/certs:/etc/nginx/certs
+      - html:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
+      - acme:/etc/acme.sh
+    depends_on:
+      - nginx-proxy
+
+  dozzle:
+    container_name: dozzle
+    restart: always
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      VIRTUAL_HOST: tapi.fusiontwin.io
+      VIRTUAL_PATH: /logs
+      DOZZLE_BASE: /logs
+      VIRTUAL_PORT: 8080
+
 volumes:
-  vol:
-#  certs:
-#  html:
-#  vhost:
-#  acme:
+  html:
+  vhost:
+  acme:

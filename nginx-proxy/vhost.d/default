@@ -1,0 +1,8 @@
+# location /media/ {
+#  alias /mount/media/;
+#  add_header Access-Control-Allow-Origin *;
+# }
+location /static/ {
+  alias /mount/app/static/;
+  add_header Access-Control-Allow-Origin *;
+}

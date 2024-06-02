@@ -1,6 +1,16 @@
 name: Create and publish a Docker image to GHCR
 
-on: workflow_dispatch
+on:
+  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
+  workflow_dispatch:
+    inputs:
+      dockerfile:
+        description: Dockerfile to build
+        required: true
+        type: choice
+        options:
+        - simple-app
+        - django
 
 env:
   REGISTRY: ghcr.io
@@ -34,6 +44,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          context: ${{ inputs.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
