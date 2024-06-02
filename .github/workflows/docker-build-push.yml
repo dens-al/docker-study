@@ -38,7 +38,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ inputs.dockerfile }}
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ inputs.dockerfile }}
 
       - name: Build and push
         uses: docker/build-push-action@v5
