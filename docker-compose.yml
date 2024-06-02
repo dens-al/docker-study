@@ -1,46 +1,13 @@
 services:
 
-#  database:
-#    image: postgres:14.6-alpine
-#    container_name: postgres-db
-#    restart: always
-#    volumes:
-#      - /opt/pgdata:/var/lib/postgresql/data/
-#    env_file:
-#      - ./env.dev
-
-#  pgadmin:
-#    image: dpage/pgadmin4
-#    container_name: pgadmin4
-#    restart: always
-#    environment:
-#      PGADMIN_DEFAULT_EMAIL: ik@nextfusion.org
-#      PGADMIN_DEFAULT_PASSWORD: p@55w0rd
-#      VIRTUAL_HOST: tapi.fusiontwin.io
-#      VIRTUAL_PATH: /pgadmin
-#      VIRTUAL_PORT: 80
-#      SCRIPT_NAME: /pgadmin
-#    volumes:
-#      - /opt/pgadmin:/var/lib/pgadmin # to store sessions (Need permissions for uid 5050 (pgadmin user) or just 777)
-#    depends_on:
-#      - database
-
-#  app:
-#    container_name: dt-be
-#    restart: always
-#    build: . # TODO better to build separately and here pull existing image
-#    volumes:
-#      - /opt/media:/home/app/media   # Need write permissions for user app on host server
-#      - /opt/static:/home/app/static
-#    env_file:
-#      - ./env.dev
-#    command: bash -c "
-#      python manage.py migrate &&
-#      python manage.py collectstatic -v 2 --noinput &&
-#      gunicorn digital_twin.wsgi:application --bind 0.0.0.0:8000 --workers=4 --preload
-#      "
-#    depends_on:
-#      - database
+  app1:
+    container_name: simple-app
+    restart: always
+    image: ghcr.io/dens-al/docker-study/simple-app:main
+    environment:
+      VIRTUAL_HOST: app.den-ops.com
+      VIRTUAL_PATH: /
+      VIRTUAL_PORT: 80
 
   # https://github.com/nginx-proxy/nginx-proxy
   nginx-proxy:
@@ -57,8 +24,9 @@ services:
       - vhost:/etc/nginx/vhost.d
       - /var/run/docker.sock:/tmp/docker.sock:ro
     environment:
-      LOG_JSON=: true
+      LOG_JSON: true
       LOG_FORMAT: '{"msec":"$msec","connection":"$connection","connection_requests":"$connection_requests","pid": "$pid","request_id": "$request_id","request_length": "$request_length","remote_addr": "$remote_addr","remote_user": "$remote_user","remote_port": "$remote_port","time_local": "$time_local","time_iso8601": "$time_iso8601","request": "$request","request_uri": "$request_uri","args": "$args","status": "$status","body_bytes_sent": "$body_bytes_sent","bytes_sent": "$bytes_sent","http_referer": "$http_referer","http_user_agent": "$http_user_agent","http_x_forwarded_for": "$http_x_forwarded_for","http_host": "$http_host","server_name": "$server_name","request_time": "$request_time","upstream": "$upstream_addr","upstream_connect_time": "$upstream_connect_time","upstream_header_time": "$upstream_header_time","upstream_response_time": "$upstream_response_time","upstream_response_length": "$upstream_response_length","upstream_cache_status": "$upstream_cache_status","ssl_protocol": "$ssl_protocol","ssl_cipher": "$ssl_cipher","scheme": "$scheme","request_method": "$request_method","server_protocol": "$server_protocol","pipe": "$pipe","gzip_ratio": "$gzip_ratio" }'
+      LETSENCRYPT_HOST: app.den-ops.com
 
   acme-companion:
     container_name: acme
@@ -66,8 +34,8 @@ services:
     image: nginxproxy/acme-companion
     environment:
       DEFAULT_EMAIL: "denis@almuhametov.com"
-      #ACME_CA_URI: "https://acme-staging-v02.api.letsencrypt.org/directory"
-      ACME_CA_URI: "https://acme-v02.api.letsencrypt.org/directory"
+      ACME_CA_URI: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      #ACME_CA_URI: "https://acme-v02.api.letsencrypt.org/directory"
       NGINX_PROXY_CONTAINER: "nginx-proxy"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -85,7 +53,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      VIRTUAL_HOST: tapi.fusiontwin.io
+      VIRTUAL_HOST: app.den-ops.com
       VIRTUAL_PATH: /logs
       DOZZLE_BASE: /logs
       VIRTUAL_PORT: 8080
