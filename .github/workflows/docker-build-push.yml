@@ -1,4 +1,4 @@
-name: Create and publish a Docker image to GHCR
+name: Build and publish a Docker image to GHCR
 
 on:
   # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs
