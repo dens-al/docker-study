@@ -11,6 +11,7 @@ on:
         options:
         - simple-app
         - django
+        - video-downloader
 
 env:
   REGISTRY: ghcr.io
